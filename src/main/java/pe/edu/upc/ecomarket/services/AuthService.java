@@ -34,7 +34,7 @@ public class AuthService {
         if (Rol.ADMINISTRADOR.equals(dto.getRol())) {
             throw new AccesoDenegadoException("No puedes registrarte como administrador");
         }
-        
+
         String correo = dto.getCorreo().trim().toLowerCase();
 
         if (usuarioRepository.existsByCorreo(correo)) {
@@ -71,11 +71,15 @@ public class AuthService {
             throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
 
+        verificarCuentaActiva(usuario);
+
+        return respuesta(usuario);
+    }
+
+    private void verificarCuentaActiva(Usuario usuario) {
         if (!usuario.isActivo()) {
             throw new DisabledException("La cuenta está desactivada");
         }
-
-        return respuesta(usuario);
     }
 
     private AuthRespuestaDTO respuesta(Usuario usuario) {
