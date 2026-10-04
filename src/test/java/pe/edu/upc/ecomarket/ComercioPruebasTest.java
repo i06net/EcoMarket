@@ -92,5 +92,8 @@ class ComercioPruebasTest extends PruebaBase {
                 .andExpect(jsonPath("$[*].comercio.id", not(hasItem(id.intValue()))));
         mockMvc.perform(get("/api/busqueda/cercanos").param("lat", "-12.1").param("lng", "-77.0").param("radio", "60"))
                 .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/busqueda/comercios").param("texto", "Miraflores"))
+                .andExpect(jsonPath("$[*].id", hasItem(id.intValue())));
     }
 }

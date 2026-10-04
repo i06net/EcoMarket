@@ -92,7 +92,7 @@ public class ComercioService {
     public List<ComercioRespuestaDTO> buscarPorTexto(String texto) {
 
         return comercioRepository
-                .findByEstadoAndNombreContainingIgnoreCaseOrderByNombreAsc(
+                .buscarPorTexto(
                         EstadoComercio.APPROVED,
                         texto.trim()
                 )
