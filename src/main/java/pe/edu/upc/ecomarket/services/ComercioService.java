@@ -356,13 +356,7 @@ public class ComercioService {
             ComercioDTO dto,
             Comercio comercio) {
 
-        if ((dto.getLatitud() == null)
-                != (dto.getLongitud() == null)) {
-
-            throw new ReglaNegocioException(
-                    "Envía la latitud y la longitud juntas, o ninguna de las dos"
-            );
-        }
+        validarCoordenadas(dto);
 
         comercio.setNombre(dto.getNombre().trim());
         comercio.setDescripcion(dto.getDescripcion());
@@ -373,30 +367,48 @@ public class ComercioService {
         comercio.setDistrito(dto.getDistrito().trim());
         comercio.setCiudad(dto.getCiudad().trim());
 
+        resolverCoordenadas(dto, comercio);
+    }
+
+    private void validarCoordenadas(ComercioDTO dto) {
+
+        if ((dto.getLatitud() == null)
+                != (dto.getLongitud() == null)) {
+
+            throw new ReglaNegocioException(
+                    "Envía la latitud y la longitud juntas, o ninguna de las dos"
+            );
+        }
+    }
+
+    private void resolverCoordenadas(
+            ComercioDTO dto,
+            Comercio comercio) {
+
         if (dto.getLatitud() != null) {
 
             comercio.setLatitud(dto.getLatitud());
             comercio.setLongitud(dto.getLongitud());
 
-        } else {
-
-            CoordenadasDTO coordenadas =
-                    geocodificacionService.geocodificar(
-                            dto.getDireccion(),
-                            dto.getDistrito(),
-                            dto.getCiudad()
-                    );
-
-            if (coordenadas == null) {
-                throw new ReglaNegocioException(
-                        "No se pudo ubicar la dirección. " +
-                        "Indica la latitud y la longitud del comercio en el mapa"
-                );
-            }
-
-            comercio.setLatitud(coordenadas.getLatitud());
-            comercio.setLongitud(coordenadas.getLongitud());
+            return;
         }
+
+        CoordenadasDTO coordenadas =
+                geocodificacionService.geocodificar(
+                        dto.getDireccion(),
+                        dto.getDistrito(),
+                        dto.getCiudad()
+                );
+
+        if (coordenadas == null) {
+            throw new ReglaNegocioException(
+                    "No se pudo ubicar la dirección. " +
+                    "Indica la latitud y la longitud del comercio en el mapa"
+            );
+        }
+
+        comercio.setLatitud(coordenadas.getLatitud());
+        comercio.setLongitud(coordenadas.getLongitud());
     }
 
     public ComercioRespuestaDTO aDTO(Comercio comercio) {
