@@ -12,6 +12,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     boolean existsByEcoEtiquetasId(Long ecoEtiquetaId);
     List<Producto> findByComercioId(Long comercioId);
     List<Producto> findByComercioIdAndActivoTrueOrderByNombreAsc(Long comercioId);
+        List<Producto> findByComercioIdAndActivoTrueAndNombreContainingIgnoreCaseOrderByNombreAsc(
+            Long comercioId, String nombre);
     List<Producto> findByComercioPropietarioIdAndActivoTrueOrderByIdAsc(Long propietarioId);
     long countByCategoriaIdAndActivoTrueAndComercioEstado(
             Long categoriaId, EstadoComercio estado);

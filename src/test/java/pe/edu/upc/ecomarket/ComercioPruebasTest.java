@@ -83,7 +83,9 @@ class ComercioPruebasTest extends PruebaBase {
 
     @Test
     void busquedaPorCercania() throws Exception {
-        Long id = crearComercio(registrar("COMERCIANTE"), true);
+                String comerciante = registrar("COMERCIANTE");
+                Long id = crearComercio(comerciante, true);
+                crearProducto(comerciante, id, "Quinua roja", "Quinua orgánica");
 
         mockMvc.perform(get("/api/busqueda/cercanos").param("lat", "-12.1020").param("lng", "-77.0420").param("radio", "5"))
                 .andExpect(status().isOk())
@@ -95,5 +97,9 @@ class ComercioPruebasTest extends PruebaBase {
 
         mockMvc.perform(get("/api/busqueda/comercios").param("texto", "Miraflores"))
                 .andExpect(jsonPath("$[*].id", hasItem(id.intValue())));
+        mockMvc.perform(get("/api/comercios/" + id + "/productos")
+                        .param("nombre", "quinua"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 }

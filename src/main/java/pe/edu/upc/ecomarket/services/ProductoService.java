@@ -190,14 +190,18 @@ public class ProductoService {
         productoRepository.save(producto);
     }
 
-    public List<ProductoRespuestaDTO> catalogo(Long comercioId) {
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> catalogo(
+            Long comercioId,
+            String nombre) {
 
         Comercio comercio =
                 comercioService.obtenerVisible(comercioId);
 
         return productoRepository
-                .findByComercioIdAndActivoTrueOrderByNombreAsc(
-                        comercio.getId()
+                .findByComercioIdAndActivoTrueAndNombreContainingIgnoreCaseOrderByNombreAsc(
+                        comercio.getId(),
+                        texto(nombre)
                 )
                 .stream()
                 .map(this::aDTO)

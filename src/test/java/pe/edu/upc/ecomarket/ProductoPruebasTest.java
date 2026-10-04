@@ -96,6 +96,10 @@ class ProductoPruebasTest extends PruebaBase {
                 .andExpect(jsonPath("$.length()").value(0));
         mockMvc.perform(get("/api/comercios/" + comercio + "/productos"))
                 .andExpect(jsonPath("$.length()").value(2));
+        mockMvc.perform(get("/api/comercios/" + comercio + "/productos")
+                        .param("nombre", "quinua"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(quinua.intValue()));
         mockMvc.perform(get("/api/productos/comparar").param("ids", quinua + "," + jabon)
                         .param("lat", "-12.1020").param("lng", "-77.0420"))
                 .andExpect(status().isOk())
