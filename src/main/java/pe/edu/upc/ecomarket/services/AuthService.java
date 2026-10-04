@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upc.ecomarket.dto.AuthRespuestaDTO;
 import pe.edu.upc.ecomarket.dto.LoginDTO;
 import pe.edu.upc.ecomarket.dto.RegistroDTO;
+import pe.edu.upc.ecomarket.exceptions.AccesoDenegadoException;
 import pe.edu.upc.ecomarket.exceptions.ConflictoException;
 import pe.edu.upc.ecomarket.exceptions.RecursoNoEncontradoException;
 import pe.edu.upc.ecomarket.models.Rol;
@@ -29,6 +30,10 @@ public class AuthService {
 
     @Transactional
     public AuthRespuestaDTO registrar(RegistroDTO dto) {
+
+        if (Rol.ADMINISTRADOR.equals(dto.getRol())) {
+            throw new AccesoDenegadoException("No puedes registrarte como administrador");
+        }
 
         String correo = dto.getCorreo().trim().toLowerCase();
 
@@ -59,24 +64,22 @@ public class AuthService {
 
         String correo = dto.getCorreo().trim().toLowerCase();
 
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() ->
-                        new BadCredentialsException(
-                                "Correo o contraseña incorrectos"));
+        Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
 
-        if (!passwordEncoder.matches(
-                dto.getContrasena(),
-                usuario.getContrasena())) {
-
-            throw new BadCredentialsException(
-                    "Correo o contraseña incorrectos");
+        if (usuario == null
+                || !passwordEncoder.matches(dto.getContrasena(), usuario.getContrasena())) {
+            throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
 
+        verificarCuentaActiva(usuario);
+
+        return respuesta(usuario);
+    }
+
+    private void verificarCuentaActiva(Usuario usuario) {
         if (!usuario.isActivo()) {
             throw new DisabledException("La cuenta está desactivada");
         }
-
-        return respuesta(usuario);
     }
 
     private AuthRespuestaDTO respuesta(Usuario usuario) {

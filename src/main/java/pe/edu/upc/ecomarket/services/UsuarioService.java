@@ -89,6 +89,10 @@ public class UsuarioService {
             );
         }
 
+        if (!usuario.isActivo()) {
+            throw new ReglaNegocioException("El usuario ya está desactivado");
+        }
+
         usuario.setActivo(false);
 
         return aDTO(

@@ -102,4 +102,37 @@ class AuthPruebasTest extends PruebaBase {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.mensaje").value("La cuenta está desactivada"));
     }
+
+    @Test
+    void loginSinDatosResponde400() throws Exception {
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("""
+                        {"correo": "", "contrasena": ""}
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.correo").exists())
+                .andExpect(jsonPath("$.errores.contrasena").exists());
+    }
+
+    @Test
+    void registroComoAdministradorResponde400() throws Exception {
+        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(registroJson(correoUnico("falso-admin"), "ADMINISTRADOR")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errores.rol").exists());
+    }
+
+    @Test
+    void desactivarDosVecesResponde400() throws Exception {
+        String cuerpo = mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(registroJson(correoUnico("doble"), "COMERCIANTE")))
+                .andReturn().getResponse().getContentAsString();
+        Long usuarioId = ((Number) JsonPath.read(cuerpo, "$.usuario.id")).longValue();
+        String tokenAdmin = tokenAdmin();
+
+        mockMvc.perform(conToken(patch("/api/usuarios/" + usuarioId + "/desactivar"), tokenAdmin))
+                .andExpect(status().isOk());
+                
+        mockMvc.perform(conToken(patch("/api/usuarios/" + usuarioId + "/desactivar"), tokenAdmin))
+                .andExpect(status().isBadRequest());
+    }
 }
