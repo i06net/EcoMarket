@@ -39,14 +39,26 @@ public class BusquedaController {
 
     @GetMapping("/productos")
     public List<ProductoRespuestaDTO> productos(
+            @RequestParam(required = false) String texto,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String ecoEtiqueta) {
 
+        boolean buscaPorTexto = texto != null && !texto.isBlank();
+        String termino = buscaPorTexto ? texto : nombre;
+
         actividadService.registrarBusqueda(
-                nombre,
+                termino,
                 Busqueda.TIPO_PRODUCTO
         );
+
+        if (buscaPorTexto) {
+            return productoService.buscarOrdenadoPorTexto(
+                    texto,
+                    categoria,
+                    ecoEtiqueta
+            );
+        }
 
         return productoService.buscarOrdenado(
                 nombre,

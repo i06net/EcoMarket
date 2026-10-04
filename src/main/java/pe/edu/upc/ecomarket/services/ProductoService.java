@@ -233,10 +233,34 @@ public class ProductoService {
         );
     }
 
-    public List<ProductoRespuestaDTO> buscarOrdenado(
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> buscarOrdenado(
             String nombre,
             String categoria,
             String ecoEtiqueta) {
+
+        return ordenar(
+                buscar(nombre, categoria, ecoEtiqueta)
+        );
+    }
+
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> buscarOrdenadoPorTexto(
+            String texto,
+            String categoria,
+            String ecoEtiqueta) {
+
+        return ordenar(
+                productoRepository.buscarPorTexto(
+                        texto(texto),
+                        texto(categoria),
+                        texto(ecoEtiqueta)
+                )
+        );
+    }
+
+    private List<ProductoRespuestaDTO> ordenar(
+            List<Producto> productos) {
 
         Set<Long> idsPreferidos = new HashSet<>();
 
@@ -254,8 +278,7 @@ public class ProductoService {
         List<ProductoRespuestaDTO> resultado =
                 new ArrayList<>();
 
-        for (Producto producto :
-                buscar(nombre, categoria, ecoEtiqueta)) {
+        for (Producto producto : productos) {
 
             resultado.add(aDTO(producto));
         }
@@ -303,7 +326,8 @@ public class ProductoService {
         return total;
     }
 
-    public List<ProductoComparadoDTO> comparar(
+        @Transactional(readOnly = true)
+        public List<ProductoComparadoDTO> comparar(
             List<Long> ids,
             Double latitud,
             Double longitud) {
