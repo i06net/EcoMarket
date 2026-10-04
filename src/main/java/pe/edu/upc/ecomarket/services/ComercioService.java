@@ -25,17 +25,11 @@ import pe.edu.upc.ecomarket.repository.SuscripcionRepository;
 import pe.edu.upc.ecomarket.repository.VisitaRepository;
 import pe.edu.upc.ecomarket.security.UsuarioActual;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ComercioService {
-
-    public static final double RADIO_MAXIMO_KM = 50;
-    private static final double RADIO_TIERRA_KM = 6371;
-    private static final double KM_POR_GRADO = 111.32;
 
     private final ComercioRepository comercioRepository;
     private final ProductoRepository productoRepository;
@@ -45,6 +39,7 @@ public class ComercioService {
     private final SuscripcionRepository suscripcionRepository;
     private final GeocodificacionService geocodificacionService;
     private final UsuarioActual usuarioActual;
+    private final UbicacionService ubicacionService;
 
     @Transactional
     public ComercioRespuestaDTO crear(ComercioDTO dto) {
@@ -151,6 +146,7 @@ public class ComercioService {
         favoritoRepository.deleteByComercioId(id);
         promocionRepository.deleteByComercioId(id);
         suscripcionRepository.deleteByComercioId(id);
+
         productoRepository.deleteAll(
                 productoRepository.findByComercioId(id)
         );
@@ -194,53 +190,38 @@ public class ComercioService {
             double longitud,
             double radioKm) {
 
-        validarUbicacion(latitud, longitud, radioKm);
-
-        double deltaLatitud = radioKm / KM_POR_GRADO;
-
-        double deltaLongitud = radioKm /
-                (KM_POR_GRADO *
-                        Math.max(Math.cos(Math.toRadians(latitud)), 0.01));
-
         List<Comercio> candidatos =
-                comercioRepository.findByEstadoAndLatitudBetweenAndLongitudBetween(
-                        EstadoComercio.APPROVED,
-                        latitud - deltaLatitud,
-                        latitud + deltaLatitud,
-                        longitud - deltaLongitud,
-                        longitud + deltaLongitud
+                ubicacionService.buscarCercanos(
+                        latitud,
+                        longitud,
+                        radioKm
                 );
 
-        List<ComercioCercanoDTO> resultado = new ArrayList<>();
+        return candidatos.stream()
+                .map(comercio -> {
 
-        for (Comercio comercio : candidatos) {
+                    double distancia = ubicacionService.redondear(
+                            ubicacionService.distanciaKm(
+                                    latitud,
+                                    longitud,
+                                    comercio.getLatitud(),
+                                    comercio.getLongitud()
+                            )
+                    );
 
-            double distancia = redondear(
-                    distanciaKm(
-                            latitud,
-                            longitud,
-                            comercio.getLatitud(),
-                            comercio.getLongitud()
-                    )
-            );
-
-            if (distancia <= radioKm) {
-                resultado.add(
-                        new ComercioCercanoDTO(
-                                aDTO(comercio),
-                                distancia
+                    return new ComercioCercanoDTO(
+                            aDTO(comercio),
+                            distancia
+                    );
+                })
+                .filter(comercio ->
+                        comercio.getDistanciaKm() <= radioKm)
+                .sorted(
+                        java.util.Comparator.comparingDouble(
+                                ComercioCercanoDTO::getDistanciaKm
                         )
-                );
-            }
-        }
-
-        resultado.sort(
-                Comparator.comparingDouble(
-                        ComercioCercanoDTO::getDistanciaKm
                 )
-        );
-
-        return resultado;
+                .toList();
     }
 
     public void validarUbicacion(
@@ -248,41 +229,11 @@ public class ComercioService {
             double longitud,
             double radioKm) {
 
-        if (latitud < -90 || latitud > 90
-                || longitud < -180 || longitud > 180) {
-            throw new ReglaNegocioException(
-                    "La latitud debe estar entre -90 y 90 " +
-                    "y la longitud entre -180 y 180"
-            );
-        }
-
-        if (radioKm <= 0 || radioKm > RADIO_MAXIMO_KM) {
-            throw new ReglaNegocioException(
-                    "El radio debe ser mayor que 0 y como máximo 50 km"
-            );
-        }
-    }
-
-    public static double distanciaKm(
-            double lat1,
-            double lng1,
-            double lat2,
-            double lng2) {
-
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-
-        double a = Math.pow(Math.sin(dLat / 2), 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.pow(Math.sin(dLng / 2), 2);
-
-        return 2 * RADIO_TIERRA_KM
-                * Math.asin(Math.sqrt(a));
-    }
-
-    public static double redondear(double valor) {
-        return Math.round(valor * 100) / 100.0;
+        ubicacionService.validarUbicacion(
+                latitud,
+                longitud,
+                radioKm
+        );
     }
 
     public boolean esPremium(Long comercioId) {
@@ -356,13 +307,7 @@ public class ComercioService {
             ComercioDTO dto,
             Comercio comercio) {
 
-        if ((dto.getLatitud() == null)
-                != (dto.getLongitud() == null)) {
-
-            throw new ReglaNegocioException(
-                    "Envía la latitud y la longitud juntas, o ninguna de las dos"
-            );
-        }
+        validarCoordenadas(dto);
 
         comercio.setNombre(dto.getNombre().trim());
         comercio.setDescripcion(dto.getDescripcion());
@@ -373,30 +318,48 @@ public class ComercioService {
         comercio.setDistrito(dto.getDistrito().trim());
         comercio.setCiudad(dto.getCiudad().trim());
 
+        resolverCoordenadas(dto, comercio);
+    }
+
+    private void validarCoordenadas(ComercioDTO dto) {
+
+        if ((dto.getLatitud() == null)
+                != (dto.getLongitud() == null)) {
+
+            throw new ReglaNegocioException(
+                    "Envía la latitud y la longitud juntas, o ninguna de las dos"
+            );
+        }
+    }
+
+    private void resolverCoordenadas(
+            ComercioDTO dto,
+            Comercio comercio) {
+
         if (dto.getLatitud() != null) {
 
             comercio.setLatitud(dto.getLatitud());
             comercio.setLongitud(dto.getLongitud());
 
-        } else {
-
-            CoordenadasDTO coordenadas =
-                    geocodificacionService.geocodificar(
-                            dto.getDireccion(),
-                            dto.getDistrito(),
-                            dto.getCiudad()
-                    );
-
-            if (coordenadas == null) {
-                throw new ReglaNegocioException(
-                        "No se pudo ubicar la dirección. " +
-                        "Indica la latitud y la longitud del comercio en el mapa"
-                );
-            }
-
-            comercio.setLatitud(coordenadas.getLatitud());
-            comercio.setLongitud(coordenadas.getLongitud());
+            return;
         }
+
+        CoordenadasDTO coordenadas =
+                geocodificacionService.geocodificar(
+                        dto.getDireccion(),
+                        dto.getDistrito(),
+                        dto.getCiudad()
+                );
+
+        if (coordenadas == null) {
+            throw new ReglaNegocioException(
+                    "No se pudo ubicar la dirección. " +
+                    "Indica la latitud y la longitud del comercio en el mapa"
+            );
+        }
+
+        comercio.setLatitud(coordenadas.getLatitud());
+        comercio.setLongitud(coordenadas.getLongitud());
     }
 
     public ComercioRespuestaDTO aDTO(Comercio comercio) {

@@ -40,6 +40,7 @@ public class ProductoService {
     private final ClasificadorService clasificadorService;
     private final EcoEtiquetaRepository ecoEtiquetaRepository;
     private final PreferenciaService preferenciaService;
+    private final UbicacionService ubicacionService;
 
     @Transactional
     public ProductoRespuestaDTO crear(ProductoDTO dto) {
@@ -345,8 +346,8 @@ public class ProductoService {
                 Comercio comercio =
                         producto.getComercio();
 
-                distancia = ComercioService.redondear(
-                        ComercioService.distanciaKm(
+                distancia = ubicacionService.redondear(
+                        ubicacionService.distanciaKm(
                                 latitud,
                                 longitud,
                                 comercio.getLatitud(),
@@ -421,8 +422,7 @@ public class ProductoService {
     private Set<EcoEtiqueta> ecoEtiquetasActivas(
             Set<Long> ids) {
 
-        Set<EcoEtiqueta> etiquetas =
-                new HashSet<>();
+        Set<EcoEtiqueta> etiquetas = new HashSet<>();
 
         for (Long id : ids) {
 

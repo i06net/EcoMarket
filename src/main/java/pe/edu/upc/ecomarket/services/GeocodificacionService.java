@@ -1,6 +1,7 @@
 package pe.edu.upc.ecomarket.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -12,6 +13,7 @@ import pe.edu.upc.ecomarket.dto.CoordenadasDTO;
 import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GeocodificacionService {
 
@@ -67,6 +69,10 @@ public class GeocodificacionService {
                             );
 
             if (lugares == null || lugares.isEmpty()) {
+                log.warn(
+                        "No se encontraron coordenadas para: "
+                                + consulta
+                );
                 return null;
             }
 
@@ -81,6 +87,12 @@ public class GeocodificacionService {
             );
 
         } catch (RestClientException | NumberFormatException e) {
+
+            log.warn(
+                    "No se pudo geocodificar la dirección: "
+                            + consulta
+            );
+
             return null;
         }
     }

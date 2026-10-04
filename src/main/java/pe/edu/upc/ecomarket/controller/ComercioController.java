@@ -89,6 +89,7 @@ public class ComercioController {
         return productoService.catalogo(id);
     }
 
+    @PreAuthorize("hasAnyRole('COMERCIANTE','ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ComercioRespuestaDTO actualizar(
             @PathVariable Long id,
@@ -97,6 +98,7 @@ public class ComercioController {
         return comercioService.actualizar(id, dto);
     }
 
+    @PreAuthorize("hasAnyRole('COMERCIANTE','ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(
