@@ -91,6 +91,10 @@ class ProductoPruebasTest extends PruebaBase {
                 .andExpect(jsonPath("$[*].id", hasItem(quinua.intValue())));
         mockMvc.perform(get("/api/busqueda/productos").param("texto", "orgánica"))
                 .andExpect(jsonPath("$[*].id", hasItem(quinua.intValue())));
+        mockMvc.perform(get("/api/busqueda/productos")
+                        .param("precioMin", "13")
+                        .param("soloDisponibles", "true"))
+                .andExpect(jsonPath("$.length()").value(0));
         mockMvc.perform(get("/api/busqueda/productos").param("ecoEtiqueta", "Artesanal"))
                 .andExpect(jsonPath("$[*].id", hasItem(jabon.intValue())))
                 .andExpect(jsonPath("$[*].id", not(hasItem(quinua.intValue()))));

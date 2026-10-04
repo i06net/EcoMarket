@@ -13,6 +13,7 @@ import pe.edu.upc.ecomarket.services.ActividadService;
 import pe.edu.upc.ecomarket.services.ComercioService;
 import pe.edu.upc.ecomarket.services.ProductoService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -42,7 +43,10 @@ public class BusquedaController {
             @RequestParam(required = false) String texto,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String ecoEtiqueta) {
+            @RequestParam(required = false) String ecoEtiqueta,
+            @RequestParam(required = false) BigDecimal precioMin,
+            @RequestParam(required = false) BigDecimal precioMax,
+            @RequestParam(defaultValue = "false") boolean soloDisponibles) {
 
         boolean buscaPorTexto = texto != null && !texto.isBlank();
         String termino = buscaPorTexto ? texto : nombre;
@@ -56,14 +60,20 @@ public class BusquedaController {
             return productoService.buscarOrdenadoPorTexto(
                     texto,
                     categoria,
-                    ecoEtiqueta
+                    ecoEtiqueta,
+                    precioMin,
+                    precioMax,
+                    soloDisponibles
             );
         }
 
         return productoService.buscarOrdenado(
                 nombre,
                 categoria,
-                ecoEtiqueta
+                ecoEtiqueta,
+                precioMin,
+                precioMax,
+                soloDisponibles
         );
     }
 
