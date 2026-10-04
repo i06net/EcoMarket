@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import pe.edu.upc.ecomarket.dto.ErrorDTO;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -22,13 +24,20 @@ public class ManejadorExcepciones {
     public ResponseEntity<ErrorDTO> validacion(MethodArgumentNotValidException ex,
                                                 HttpServletRequest request) {
 
-        String mensaje = "Hay campos inválidos";
+        Map<String, String> errores = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errores.put(error.getField(), error.getDefaultMessage()));
 
-        return responder(
-                HttpStatus.BAD_REQUEST,
-                mensaje,
-                request
+        ErrorDTO respuesta = new ErrorDTO(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                "Hay campos inválidos",
+                request.getRequestURI(),
+                errores
         );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
     }
 
     @ExceptionHandler({ReglaNegocioException.class, IllegalArgumentException.class})
@@ -49,7 +58,7 @@ public class ManejadorExcepciones {
 
         return responder(
                 HttpStatus.UNAUTHORIZED,
-                "Correo o contraseña incorrectos",
+                ex.getMessage(),
                 request
         );
     }
@@ -61,7 +70,7 @@ public class ManejadorExcepciones {
 
         return responder(
                 HttpStatus.UNAUTHORIZED,
-                "El usuario está deshabilitado",
+                ex.getMessage(),
                 request
         );
     }

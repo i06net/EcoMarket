@@ -3,6 +3,7 @@ package pe.edu.upc.ecomarket.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -24,5 +25,6 @@ public class RegistroDTO {
     private String contrasena;
 
     @NotBlank
+    @Pattern(regexp = "CONSUMIDOR|COMERCIANTE")
     private String rol;
 }
