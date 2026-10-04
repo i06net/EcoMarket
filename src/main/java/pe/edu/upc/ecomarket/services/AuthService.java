@@ -59,17 +59,11 @@ public class AuthService {
 
         String correo = dto.getCorreo().trim().toLowerCase();
 
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() ->
-                        new BadCredentialsException(
-                                "Correo o contraseña incorrectos"));
+        Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
 
-        if (!passwordEncoder.matches(
-                dto.getContrasena(),
-                usuario.getContrasena())) {
-
-            throw new BadCredentialsException(
-                    "Correo o contraseña incorrectos");
+        if (usuario == null
+                || !passwordEncoder.matches(dto.getContrasena(), usuario.getContrasena())) {
+            throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
 
         if (!usuario.isActivo()) {
