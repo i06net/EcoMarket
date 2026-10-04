@@ -3,8 +3,11 @@
 ## Universidad Peruana de Ciencias Aplicadas
 
 **Curso:** 1ASI0705 – Arquitectura de Aplicaciones Web
+
 **Docente:** Cristian Roberto Sánchez Flores
+
 **Grupo:** 06
+
 **Carrera:** Ingeniería de Sistemas de la Información
 
 ## Integrantes
