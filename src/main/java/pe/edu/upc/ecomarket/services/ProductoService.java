@@ -194,15 +194,17 @@ public class ProductoService {
         @Transactional(readOnly = true)
         public List<ProductoRespuestaDTO> catalogo(
             Long comercioId,
-            String nombre) {
+                    String nombre,
+                    String categoria) {
 
         Comercio comercio =
                 comercioService.obtenerVisible(comercioId);
 
         return productoRepository
-                .findByComercioIdAndActivoTrueAndNombreContainingIgnoreCaseOrderByNombreAsc(
+                .buscarCatalogo(
                         comercio.getId(),
-                        texto(nombre)
+                        texto(nombre),
+                        texto(categoria)
                 )
                 .stream()
                 .map(this::aDTO)

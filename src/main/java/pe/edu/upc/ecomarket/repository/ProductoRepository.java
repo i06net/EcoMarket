@@ -14,6 +14,20 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> findByComercioIdAndActivoTrueOrderByNombreAsc(Long comercioId);
         List<Producto> findByComercioIdAndActivoTrueAndNombreContainingIgnoreCaseOrderByNombreAsc(
             Long comercioId, String nombre);
+
+        @Query("""
+            SELECT p
+            FROM Producto p
+            WHERE p.comercio.id = ?1
+            AND p.activo = true
+            AND LOWER(p.nombre) LIKE LOWER(CONCAT('%', ?2, '%'))
+            AND LOWER(p.categoria.nombre) LIKE LOWER(CONCAT('%', ?3, '%'))
+            ORDER BY p.nombre
+            """)
+        List<Producto> buscarCatalogo(
+                Long comercioId,
+                String nombre,
+                String categoria);
     List<Producto> findByComercioPropietarioIdAndActivoTrueOrderByIdAsc(Long propietarioId);
     long countByCategoriaIdAndActivoTrueAndComercioEstado(
             Long categoriaId, EstadoComercio estado);

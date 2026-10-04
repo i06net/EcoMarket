@@ -85,9 +85,10 @@ public class ComercioController {
     @GetMapping("/{id}/productos")
     public List<ProductoRespuestaDTO> catalogo(
             @PathVariable Long id,
-            @RequestParam(required = false) String nombre) {
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String categoria) {
 
-        return productoService.catalogo(id, nombre);
+        return productoService.catalogo(id, nombre, categoria);
     }
 
     @PutMapping("/{id}")

@@ -101,5 +101,9 @@ class ComercioPruebasTest extends PruebaBase {
                         .param("nombre", "quinua"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
+        mockMvc.perform(get("/api/comercios/" + id + "/productos")
+                        .param("categoria", "alimentos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1));
     }
 }
