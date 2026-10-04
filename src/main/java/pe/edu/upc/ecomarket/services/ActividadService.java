@@ -26,6 +26,10 @@ public class ActividadService {
             Producto producto,
             String terminoBusqueda) {
 
+                if (comercio == null) {
+                    return;
+                }
+                
         Usuario usuario = usuarioActual.buscar();
 
         if (usuario != null &&
