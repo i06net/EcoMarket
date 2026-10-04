@@ -146,6 +146,7 @@ public class ComercioService {
         favoritoRepository.deleteByComercioId(id);
         promocionRepository.deleteByComercioId(id);
         suscripcionRepository.deleteByComercioId(id);
+
         productoRepository.deleteAll(
                 productoRepository.findByComercioId(id)
         );
@@ -223,10 +224,6 @@ public class ComercioService {
                 .toList();
     }
 
-    /*
-     * Se mantiene este método para compatibilidad
-     * con otros módulos que puedan utilizarlo.
-     */
     public void validarUbicacion(
             double latitud,
             double longitud,
@@ -237,36 +234,6 @@ public class ComercioService {
                 longitud,
                 radioKm
         );
-    }
-
-    /*
-     * Se mantiene este método para compatibilidad
-     * con otros módulos que puedan utilizarlo.
-     */
-    public static double distanciaKm(
-            double lat1,
-            double lng1,
-            double lat2,
-            double lng2) {
-
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-
-        double a = Math.pow(Math.sin(dLat / 2), 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2))
-                * Math.pow(Math.sin(dLng / 2), 2);
-
-        return 2 * 6371
-                * Math.asin(Math.sqrt(a));
-    }
-
-    /*
-     * Se mantiene este método para compatibilidad
-     * con otros módulos que puedan utilizarlo.
-     */
-    public static double redondear(double valor) {
-        return Math.round(valor * 100) / 100.0;
     }
 
     public boolean esPremium(Long comercioId) {

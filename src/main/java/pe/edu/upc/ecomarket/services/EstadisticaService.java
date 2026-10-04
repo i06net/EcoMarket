@@ -40,6 +40,7 @@ public class EstadisticaService {
     private final ProductoRepository productoRepository;
     private final FavoritoRepository favoritoRepository;
     private final UsuarioActual usuarioActual;
+    private final UbicacionService ubicacionService;
 
     public EstadisticasDTO delComercio(
             Long comercioId,
@@ -246,8 +247,8 @@ public class EstadisticaService {
 
         return new EstadisticasAvanzadasDTO(
                 nombreCategoria,
-                ComercioService.redondear(promedioPropio),
-                ComercioService.redondear(promedioCategoria),
+                ubicacionService.redondear(promedioPropio),
+                ubicacionService.redondear(promedioCategoria),
                 evolucion
         );
     }
