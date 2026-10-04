@@ -25,17 +25,11 @@ import pe.edu.upc.ecomarket.repository.SuscripcionRepository;
 import pe.edu.upc.ecomarket.repository.VisitaRepository;
 import pe.edu.upc.ecomarket.security.UsuarioActual;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ComercioService {
-
-    public static final double RADIO_MAXIMO_KM = 50;
-    private static final double RADIO_TIERRA_KM = 6371;
-    private static final double KM_POR_GRADO = 111.32;
 
     private final ComercioRepository comercioRepository;
     private final ProductoRepository productoRepository;
@@ -45,6 +39,7 @@ public class ComercioService {
     private final SuscripcionRepository suscripcionRepository;
     private final GeocodificacionService geocodificacionService;
     private final UsuarioActual usuarioActual;
+    private final UbicacionService ubicacionService;
 
     @Transactional
     public ComercioRespuestaDTO crear(ComercioDTO dto) {
@@ -194,75 +189,60 @@ public class ComercioService {
             double longitud,
             double radioKm) {
 
-        validarUbicacion(latitud, longitud, radioKm);
-
-        double deltaLatitud = radioKm / KM_POR_GRADO;
-
-        double deltaLongitud = radioKm /
-                (KM_POR_GRADO *
-                        Math.max(Math.cos(Math.toRadians(latitud)), 0.01));
-
         List<Comercio> candidatos =
-                comercioRepository.findByEstadoAndLatitudBetweenAndLongitudBetween(
-                        EstadoComercio.APPROVED,
-                        latitud - deltaLatitud,
-                        latitud + deltaLatitud,
-                        longitud - deltaLongitud,
-                        longitud + deltaLongitud
+                ubicacionService.buscarCercanos(
+                        latitud,
+                        longitud,
+                        radioKm
                 );
 
-        List<ComercioCercanoDTO> resultado = new ArrayList<>();
+        return candidatos.stream()
+                .map(comercio -> {
 
-        for (Comercio comercio : candidatos) {
+                    double distancia = ubicacionService.redondear(
+                            ubicacionService.distanciaKm(
+                                    latitud,
+                                    longitud,
+                                    comercio.getLatitud(),
+                                    comercio.getLongitud()
+                            )
+                    );
 
-            double distancia = redondear(
-                    distanciaKm(
-                            latitud,
-                            longitud,
-                            comercio.getLatitud(),
-                            comercio.getLongitud()
-                    )
-            );
-
-            if (distancia <= radioKm) {
-                resultado.add(
-                        new ComercioCercanoDTO(
-                                aDTO(comercio),
-                                distancia
+                    return new ComercioCercanoDTO(
+                            aDTO(comercio),
+                            distancia
+                    );
+                })
+                .filter(comercio ->
+                        comercio.getDistanciaKm() <= radioKm)
+                .sorted(
+                        java.util.Comparator.comparingDouble(
+                                ComercioCercanoDTO::getDistanciaKm
                         )
-                );
-            }
-        }
-
-        resultado.sort(
-                Comparator.comparingDouble(
-                        ComercioCercanoDTO::getDistanciaKm
                 )
-        );
-
-        return resultado;
+                .toList();
     }
 
+    /*
+     * Se mantiene este método para compatibilidad
+     * con otros módulos que puedan utilizarlo.
+     */
     public void validarUbicacion(
             double latitud,
             double longitud,
             double radioKm) {
 
-        if (latitud < -90 || latitud > 90
-                || longitud < -180 || longitud > 180) {
-            throw new ReglaNegocioException(
-                    "La latitud debe estar entre -90 y 90 " +
-                    "y la longitud entre -180 y 180"
-            );
-        }
-
-        if (radioKm <= 0 || radioKm > RADIO_MAXIMO_KM) {
-            throw new ReglaNegocioException(
-                    "El radio debe ser mayor que 0 y como máximo 50 km"
-            );
-        }
+        ubicacionService.validarUbicacion(
+                latitud,
+                longitud,
+                radioKm
+        );
     }
 
+    /*
+     * Se mantiene este método para compatibilidad
+     * con otros módulos que puedan utilizarlo.
+     */
     public static double distanciaKm(
             double lat1,
             double lng1,
@@ -277,10 +257,14 @@ public class ComercioService {
                 * Math.cos(Math.toRadians(lat2))
                 * Math.pow(Math.sin(dLng / 2), 2);
 
-        return 2 * RADIO_TIERRA_KM
+        return 2 * 6371
                 * Math.asin(Math.sqrt(a));
     }
 
+    /*
+     * Se mantiene este método para compatibilidad
+     * con otros módulos que puedan utilizarlo.
+     */
     public static double redondear(double valor) {
         return Math.round(valor * 100) / 100.0;
     }
