@@ -18,6 +18,7 @@ public class EstadisticasDTO {
     private LocalDate hasta;
     private long visitasComercio;
     private List<ConteoDTO> visitasProductos;
+    private Long totalVisitas;
     private List<ConteoDTO> terminosBusqueda;
     private String mensajeVisitas;
     private String mensajeBusquedas;

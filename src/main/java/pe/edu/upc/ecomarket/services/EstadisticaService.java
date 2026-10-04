@@ -92,6 +92,14 @@ public class EstadisticaService {
                 )
         );
 
+        long totalProductos = 0;
+        for (ConteoDTO conteo : dto.getVisitasProductos()) {
+                totalProductos = totalProductos + conteo.getCantidad();
+        }
+
+        dto.setTotalVisitas(dto.getVisitasComercio() + totalProductos);
+
+
         dto.setTerminosBusqueda(
                 visitaRepository
                         .contarTerminos(comercio.getId(), inicio, fin)
