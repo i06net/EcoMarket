@@ -114,6 +114,14 @@ class ProductoPruebasTest extends PruebaBase {
                 .andExpect(status().isBadRequest());
     }
 
+        @Test
+        void busquedaRechazaRangoDePreciosInvalido() throws Exception {
+                mockMvc.perform(get("/api/busqueda/productos")
+                                                .param("precioMin", "20")
+                                                .param("precioMax", "10"))
+                                .andExpect(status().isBadRequest());
+        }
+
     @Test
     void correccionManualYEliminacionLogica() throws Exception {
         String comerciante = registrar("COMERCIANTE");
