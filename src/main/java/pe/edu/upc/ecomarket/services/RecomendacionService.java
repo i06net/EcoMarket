@@ -209,10 +209,9 @@ public class RecomendacionService {
 
         for (String termino : terminos) {
 
-            if (texto.contains(termino)) {
-                puntos++;
-                break;
-            }
+                if (texto.contains(termino)) {
+                        puntos++;
+                }
         }
 
         return puntos;
