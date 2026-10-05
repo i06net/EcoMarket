@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -190,14 +191,20 @@ public class ProductoService {
         productoRepository.save(producto);
     }
 
-    public List<ProductoRespuestaDTO> catalogo(Long comercioId) {
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> catalogo(
+            Long comercioId,
+                    String nombre,
+                    String categoria) {
 
         Comercio comercio =
                 comercioService.obtenerVisible(comercioId);
 
         return productoRepository
-                .findByComercioIdAndActivoTrueOrderByNombreAsc(
-                        comercio.getId()
+                .buscarCatalogo(
+                        comercio.getId(),
+                        texto(nombre),
+                        texto(categoria)
                 )
                 .stream()
                 .map(this::aDTO)
@@ -229,10 +236,112 @@ public class ProductoService {
         );
     }
 
-    public List<ProductoRespuestaDTO> buscarOrdenado(
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> buscarOrdenado(
             String nombre,
             String categoria,
             String ecoEtiqueta) {
+
+                return buscarOrdenado(
+                        nombre,
+                        categoria,
+                        ecoEtiqueta,
+                        null,
+                        null,
+                        false
+        );
+    }
+
+            @Transactional(readOnly = true)
+            public List<ProductoRespuestaDTO> buscarOrdenado(
+                    String nombre,
+                    String categoria,
+                    String ecoEtiqueta,
+                    BigDecimal precioMin,
+                    BigDecimal precioMax,
+                    boolean soloDisponibles) {
+
+                return ordenar(
+                        filtrar(
+                                buscar(nombre, categoria, ecoEtiqueta),
+                                precioMin,
+                                precioMax,
+                                soloDisponibles
+                        )
+                );
+            }
+
+        @Transactional(readOnly = true)
+        public List<ProductoRespuestaDTO> buscarOrdenadoPorTexto(
+            String texto,
+            String categoria,
+            String ecoEtiqueta) {
+
+                return buscarOrdenadoPorTexto(
+                        texto,
+                        categoria,
+                        ecoEtiqueta,
+                        null,
+                        null,
+                        false
+                );
+            }
+
+            @Transactional(readOnly = true)
+            public List<ProductoRespuestaDTO> buscarOrdenadoPorTexto(
+                    String texto,
+                    String categoria,
+                    String ecoEtiqueta,
+                    BigDecimal precioMin,
+                    BigDecimal precioMax,
+                    boolean soloDisponibles) {
+
+        return ordenar(
+                        filtrar(
+                                productoRepository.buscarPorTexto(
+                                        texto(texto),
+                                        texto(categoria),
+                                        texto(ecoEtiqueta)
+                                ),
+                                precioMin,
+                                precioMax,
+                                soloDisponibles
+                )
+        );
+    }
+
+            private List<Producto> filtrar(
+                    List<Producto> productos,
+                    BigDecimal precioMin,
+                    BigDecimal precioMax,
+                    boolean soloDisponibles) {
+
+                if (precioMin != null && precioMin.signum() < 0
+                        || precioMax != null && precioMax.signum() < 0) {
+                    throw new ReglaNegocioException(
+                            "Los precios de búsqueda no pueden ser negativos"
+                    );
+                }
+
+                if (precioMin != null && precioMax != null
+                        && precioMin.compareTo(precioMax) > 0) {
+                    throw new ReglaNegocioException(
+                            "El precio mínimo no puede ser mayor que el máximo"
+                    );
+                }
+
+                return productos.stream()
+                        .filter(producto -> precioMin == null
+                                || producto.getPrecio().compareTo(precioMin) >= 0)
+                        .filter(producto -> precioMax == null
+                                || producto.getPrecio().compareTo(precioMax) <= 0)
+                        .filter(producto -> !soloDisponibles
+                                || producto.getStock() > 0)
+                        .toList();
+            }
+
+    private List<ProductoRespuestaDTO> ordenar(
+            List<Producto> productos) {
 
         Set<Long> idsPreferidos = new HashSet<>();
 
@@ -250,8 +359,7 @@ public class ProductoService {
         List<ProductoRespuestaDTO> resultado =
                 new ArrayList<>();
 
-        for (Producto producto :
-                buscar(nombre, categoria, ecoEtiqueta)) {
+        for (Producto producto : productos) {
 
             resultado.add(aDTO(producto));
         }
@@ -299,7 +407,8 @@ public class ProductoService {
         return total;
     }
 
-    public List<ProductoComparadoDTO> comparar(
+        @Transactional(readOnly = true)
+        public List<ProductoComparadoDTO> comparar(
             List<Long> ids,
             Double latitud,
             Double longitud) {

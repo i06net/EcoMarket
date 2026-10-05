@@ -58,12 +58,16 @@ public class FavoritoService {
         );
     }
 
-    public List<FavoritoRespuestaDTO> listar() {
+        @Transactional(readOnly = true)
+        public List<FavoritoRespuestaDTO> listar() {
 
         Long usuarioId = usuarioActual.obtener().getId();
 
         return favoritoRepository
-                .findByUsuarioIdOrderByFechaRegistroDesc(usuarioId)
+                .findByUsuarioIdAndComercioEstadoOrderByFechaRegistroDesc(
+                        usuarioId,
+                        EstadoComercio.APPROVED
+                )
                 .stream()
                 .map(this::aDTO)
                 .toList();

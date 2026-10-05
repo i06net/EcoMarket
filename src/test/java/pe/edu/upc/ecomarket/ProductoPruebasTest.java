@@ -89,6 +89,12 @@ class ProductoPruebasTest extends PruebaBase {
 
         mockMvc.perform(get("/api/busqueda/productos").param("nombre", "QUINUA ROJA"))
                 .andExpect(jsonPath("$[*].id", hasItem(quinua.intValue())));
+        mockMvc.perform(get("/api/busqueda/productos").param("texto", "orgánica"))
+                .andExpect(jsonPath("$[*].id", hasItem(quinua.intValue())));
+        mockMvc.perform(get("/api/busqueda/productos")
+                        .param("precioMin", "13")
+                        .param("soloDisponibles", "true"))
+                .andExpect(jsonPath("$.length()").value(0));
         mockMvc.perform(get("/api/busqueda/productos").param("ecoEtiqueta", "Artesanal"))
                 .andExpect(jsonPath("$[*].id", hasItem(jabon.intValue())))
                 .andExpect(jsonPath("$[*].id", not(hasItem(quinua.intValue()))));
@@ -96,6 +102,10 @@ class ProductoPruebasTest extends PruebaBase {
                 .andExpect(jsonPath("$.length()").value(0));
         mockMvc.perform(get("/api/comercios/" + comercio + "/productos"))
                 .andExpect(jsonPath("$.length()").value(2));
+        mockMvc.perform(get("/api/comercios/" + comercio + "/productos")
+                        .param("nombre", "quinua"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(quinua.intValue()));
         mockMvc.perform(get("/api/productos/comparar").param("ids", quinua + "," + jabon)
                         .param("lat", "-12.1020").param("lng", "-77.0420"))
                 .andExpect(status().isOk())
@@ -103,6 +113,14 @@ class ProductoPruebasTest extends PruebaBase {
         mockMvc.perform(get("/api/productos/comparar").param("ids", quinua.toString()))
                 .andExpect(status().isBadRequest());
     }
+
+        @Test
+        void busquedaRechazaRangoDePreciosInvalido() throws Exception {
+                mockMvc.perform(get("/api/busqueda/productos")
+                                                .param("precioMin", "20")
+                                                .param("precioMax", "10"))
+                                .andExpect(status().isBadRequest());
+        }
 
     @Test
     void correccionManualYEliminacionLogica() throws Exception {

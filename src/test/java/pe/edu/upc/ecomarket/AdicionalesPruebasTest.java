@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +33,26 @@ class AdicionalesPruebasTest extends PruebaBase {
         mockMvc.perform(json(put("/api/preferencias"), consumidor, "{\"ecoEtiquetaIds\": [1, 5]}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void consumidorNoVeFavoritosNoAprobados() throws Exception {
+        String comerciante = registrar("COMERCIANTE");
+        Long comercio = crearComercio(comerciante, true);
+        String consumidor = registrar("CONSUMIDOR");
+        String admin = tokenAdmin();
+
+        mockMvc.perform(json(post("/api/favoritos"), consumidor,
+                        "{\"comercioId\": " + comercio + "}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(json(patch("/api/comercios/" + comercio + "/validacion"), admin,
+                        "{\"estado\": \"REJECTED\", \"motivo\": \"Cerrado\"}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(conToken(get("/api/favoritos"), consumidor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
