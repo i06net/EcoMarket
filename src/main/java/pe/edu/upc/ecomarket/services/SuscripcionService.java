@@ -46,6 +46,12 @@ public class SuscripcionService {
             );
         }
 
+        if (dto.getMeses() == null || dto.getMeses() < 1) {
+                throw new ReglaNegocioException(
+                        "Debes contratar al menos 1 mes del plan premium"
+                );
+        }
+
         BigDecimal monto =
                 PRECIO_MENSUAL.multiply(
                         BigDecimal.valueOf(dto.getMeses())
