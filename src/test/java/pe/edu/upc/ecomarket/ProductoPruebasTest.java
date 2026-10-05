@@ -123,6 +123,25 @@ class ProductoPruebasTest extends PruebaBase {
         mockMvc.perform(get("/api/productos/" + producto)).andExpect(status().isNotFound());
     }
 
+        @Test
+    void rechazaProductoSinNombre() throws Exception {
+        String comerciante = registrar("COMERCIANTE");
+        Long comercio = crearComercio(comerciante, false);
+        mockMvc.perform(json(post("/api/productos"), comerciante, """
+                        {"comercioId": %d, "categoriaId": 1, "nombre": "", "precio": 3, "stock": 3}
+                        """.formatted(comercio)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void compararRechazaCoordenadasFueraDeRango() throws Exception {
+        mockMvc.perform(get("/api/productos/comparar")
+                        .param("ids", "1", "2")
+                        .param("lat", "100")
+                        .param("lng", "0"))
+                .andExpect(status().isBadRequest());
+    }
+
     @Test
     void ecoEtiquetaAsignadaSeDesactiva() throws Exception {
         String admin = tokenAdmin();
