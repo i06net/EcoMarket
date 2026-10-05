@@ -53,15 +53,17 @@ public class EstadisticaService {
         LocalDate hasta = LocalDate.now();
         LocalDate desde;
 
-        if (periodo.equals("semana")) {
-            desde = hasta.minusDays(6);
+        if (periodo.equals("dia")) {
+                desde = hasta;
+        } else if (periodo.equals("semana")) {
+                desde = hasta.minusDays(6);
         } else if (periodo.equals("mes")) {
             desde = hasta.minusDays(29);
         } else if (periodo.equals("anio")) {
             desde = hasta.minusDays(364);
         } else {
             throw new ReglaNegocioException(
-                    "El periodo debe ser semana, mes o anio"
+                    "El periodo debe ser dia, semana, mes o anio"
             );
         }
 
@@ -91,6 +93,14 @@ public class EstadisticaService {
                         fin
                 )
         );
+
+        long totalProductos = 0;
+        for (ConteoDTO conteo : dto.getVisitasProductos()) {
+                totalProductos = totalProductos + conteo.getCantidad();
+        }
+
+        dto.setTotalVisitas(dto.getVisitasComercio() + totalProductos);
+
 
         dto.setTerminosBusqueda(
                 visitaRepository

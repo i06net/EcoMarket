@@ -123,4 +123,22 @@ class AdicionalesPruebasTest extends PruebaBase {
         mockMvc.perform(conToken(get("/api/recomendaciones/productos"), comerciante))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void premiumValidaMesesYTitulo() throws Exception {
+        String comerciante = registrar("COMERCIANTE");
+        Long comercio = crearComercio(comerciante, true);
+        LocalDate hoy = LocalDate.now();
+        
+        mockMvc.perform(json(post("/api/suscripciones"), comerciante, "{\"comercioId\": " + comercio + ", \"meses\": 0}"))
+                .andExpect(status().isBadRequest());
+ 
+        mockMvc.perform(json(post("/api/suscripciones"), comerciante, "{\"comercioId\": " + comercio + ", \"meses\": 1}"))
+                .andExpect(status().isCreated());
+   
+        String sinTitulo = """
+                {"comercioId": %d, "titulo": " ", "fechaInicio": "%s", "fechaFin": "%s"}
+                """.formatted(comercio, hoy, hoy.plusDays(7));
+        mockMvc.perform(json(post("/api/promociones"), comerciante, sinTitulo))
+                .andExpect(status().isBadRequest());
 }
