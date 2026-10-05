@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo maestro | EcoMarket</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="site-header"><a class="brand" th:href="@{/}"><span class="brand-mark">✦</span> EcoMarket</a><nav class="main-nav"><a th:href="@{/}">Inicio</a><a class="button button-quiet" th:href="@{/login}">Iniciar sesión</a></nav></header>
+<main class="shell catalog-page">
+    <div class="catalog-heading"><div><p class="eyebrow">Catálogo maestro</p><h1>Productos con propósito</h1><p class="muted">Consulta la oferta sostenible disponible en EcoMarket.</p></div><a class="text-link" th:href="@{/}">← Volver al inicio</a></div>
+    <form class="catalog-filters" th:action="@{/catalogo}" method="get">
+        <label class="filter-search"><span>Buscar</span><input name="texto" type="search" th:value="${texto}" placeholder="Nombre o descripción"></label>
+        <label><span>Categoría</span><select name="categoria"><option value="">Todas</option><option th:each="categoria : ${categorias}" th:value="${categoria.nombre}" th:text="${categoria.nombre}" th:selected="${categoria.nombre == categoriaSeleccionada}">Categoría</option></select></label>
+        <button class="button button-primary" type="submit">Aplicar filtros</button>
+    </form>
+    <div class="catalog-meta"><span th:text="${productos.size()} + ' productos encontrados'">0 productos encontrados</span><a th:href="@{/catalogo}">Limpiar filtros</a></div>
+    <div class="product-grid" th:if="${!productos.isEmpty()}">
+        <article class="product-card" th:each="producto : ${productos}">
+            <div class="product-art"><span th:text="${producto.categoriaNombre != null ? producto.categoriaNombre.substring(0, 1) : 'E'}">E</span></div>
+            <div class="product-body"><p class="product-category" th:text="${producto.categoriaNombre}">Categoría</p><h2 th:text="${producto.nombre}">Producto sostenible</h2><p class="product-description" th:text="${producto.descripcion}">Descripción del producto.</p><p class="product-price" th:text="'S/ ' + ${producto.precio}">S/ 0.00</p><p class="product-store" th:text="${producto.comercioNombre}">Comercio local</p><div class="tag-row"><span class="tag" th:each="etiqueta : ${producto.ecoEtiquetas}" th:text="${etiqueta.nombre}">Eco-Etiqueta</span></div></div>
+        </article>
+    </div>
+    <div class="empty-state" th:if="${productos.isEmpty()}"><span>⌕</span><h2>No encontramos productos</h2><p>Prueba con otro término o elimina los filtros.</p><a class="button button-outline" th:href="@{/catalogo}">Ver todo el catálogo</a></div>
+</main>
+<footer class="site-footer shell"><span>© 2026 EcoMarket</span><span>Información clara para comprar mejor.</span></footer>
+</body>
+</html>

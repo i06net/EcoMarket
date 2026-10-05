@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EcoMarket | Compra local y sostenible</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" th:href="@{/}"><span class="brand-mark">✦</span> EcoMarket</a>
+    <nav class="main-nav" aria-label="Navegación principal">
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#impacto">Impacto</a>
+        <a th:href="@{/catalogo}">Catálogo</a>
+        <a class="button button-quiet" th:href="@{/login}">Iniciar sesión</a>
+    </nav>
+</header>
+
+<main>
+    <section class="hero shell">
+        <div class="hero-copy">
+            <p class="eyebrow">Consumo responsable, cerca de ti</p>
+            <h1>Descubre comercio local que deja una huella positiva.</h1>
+            <p class="hero-lede">Encuentra tiendas, productos sostenibles y decisiones de compra que apoyan a tu barrio.</p>
+            <form class="search-form" th:action="@{/catalogo}" method="get">
+                <label for="hero-search">Busca un producto</label>
+                <div class="search-row">
+                    <input id="hero-search" name="texto" type="search" placeholder="Quinua, jabón, miel...">
+                    <button class="button button-primary" type="submit">Explorar</button>
+                </div>
+            </form>
+        </div>
+        <div class="hero-map" aria-label="Mapa ilustrado de comercios locales">
+            <div class="map-road road-one"></div>
+            <div class="map-road road-two"></div>
+            <div class="map-block block-one"></div>
+            <div class="map-block block-two"></div>
+            <div class="map-block block-three"></div>
+            <span class="map-pin pin-one">●<small>Mercado local</small></span>
+            <span class="map-pin pin-two">●<small>Tienda a granel</small></span>
+            <span class="map-pin pin-three">●<small>Panadería</small></span>
+            <div class="map-compass">N</div>
+        </div>
+    </section>
+
+    <section id="como-funciona" class="section shell">
+        <div class="section-heading">
+            <div><p class="eyebrow">Una experiencia simple</p><h2>Compra con intención</h2></div>
+            <a class="text-link" th:href="@{/catalogo}">Ver catálogo →</a>
+        </div>
+        <div class="feature-grid">
+            <article class="feature-card"><span class="feature-number">01</span><h3>Busca cerca</h3><p>Explora productos y comercios locales sin perder tiempo.</p></article>
+            <article class="feature-card feature-card-accent"><span class="feature-number">02</span><h3>Entiende mejor</h3><p>Las Eco-Etiquetas hacen visible el impacto de cada elección.</p></article>
+            <article class="feature-card"><span class="feature-number">03</span><h3>Apoya tu barrio</h3><p>Compra a negocios que mantienen viva la economía local.</p></article>
+        </div>
+    </section>
+
+    <section id="impacto" class="impact-band">
+        <div class="shell impact-content">
+            <div><p class="eyebrow">Objetivo de desarrollo sostenible 12</p><h2>Pequeñas decisiones, cambios visibles.</h2><p>Consume mejor con información clara y comercios responsables.</p></div>
+            <div class="impact-stat"><strong>12</strong><span>ODS<br>Consumo<br>responsable</span></div>
+        </div>
+    </section>
+
+    <section class="section shell">
+        <div class="section-heading"><div><p class="eyebrow">Empieza por lo que necesitas</p><h2>Explora categorías</h2></div></div>
+        <div class="category-grid">
+            <a class="category-tile" th:each="categoria : ${categorias}" th:href="@{/catalogo(categoria=${categoria.nombre})}">
+                <span class="category-icon">✦</span><span th:text="${categoria.nombre}">Categoría</span><small th:text="${categoria.descripcion}">Productos responsables</small>
+            </a>
+        </div>
+    </section>
+
+    <section class="section shell plans-section">
+        <div class="section-heading"><div><p class="eyebrow">Para comercios locales</p><h2>Haz crecer tu tienda</h2></div></div>
+        <div class="plan-grid">
+            <article class="plan-card"><p class="plan-label">Plan gratuito</p><h3>S/ 0</h3><p>Empieza con un catálogo básico.</p><a class="button button-outline" th:href="@{/login}">Registrar tienda</a></article>
+            <article class="plan-card plan-card-featured"><p class="plan-label">Plan premium</p><h3>Más alcance local</h3><p>Destaca tus productos y entiende mejor a tus clientes.</p><a class="button button-primary" th:href="@{/login}">Conocer planes</a></article>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer shell"><span>© 2026 EcoMarket</span><span>Compra local. Vive sostenible.</span></footer>
+</body>
+</html>

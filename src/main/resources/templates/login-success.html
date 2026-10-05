@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sesión iniciada | EcoMarket</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body class="auth-page">
+<main class="success-card shell">
+    <span class="success-icon">✓</span>
+    <p class="eyebrow">Sesión iniciada</p>
+    <h1>Hola, <span th:text="${correo}">usuario</span>.</h1>
+    <p>Tu token JWT está listo para usar en las peticiones protegidas de EcoMarket.</p>
+    <div class="token-box"><small>Token de acceso</small><code th:text="${auth.token}">JWT</code></div>
+    <a class="button button-primary" th:href="@{/catalogo}">Explorar catálogo</a>
+</main>
+</body>
+</html>

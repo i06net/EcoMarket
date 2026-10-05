@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión | EcoMarket</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body class="auth-page">
+<header class="site-header shell-header"><a class="brand" th:href="@{/}"><span class="brand-mark">✦</span> EcoMarket</a><a class="text-link" th:href="@{/}">Volver al inicio</a></header>
+<main class="auth-layout shell">
+    <section class="auth-aside"><p class="eyebrow">Tu consumo, tus decisiones</p><h1>Vuelve a descubrir lo bueno de tu barrio.</h1><p>Guarda tus comercios favoritos y encuentra productos con impacto claro.</p></section>
+    <section class="auth-card">
+        <p class="eyebrow">Acceso EcoMarket</p><h2>Iniciar sesión</h2><p class="muted">Usa tu correo y contraseña para continuar.</p>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}">Correo o contraseña incorrectos</div>
+        <form th:action="@{/login}" th:object="${login}" method="post" class="stack-form">
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" type="email" th:field="*{correo}" autocomplete="email" required>
+            <label for="contrasena">Contraseña</label>
+            <input id="contrasena" type="password" th:field="*{contrasena}" autocomplete="current-password" required>
+            <button class="button button-primary button-wide" type="submit">Entrar a EcoMarket</button>
+        </form>
+        <p class="form-footnote">¿Aún no tienes una cuenta? <a th:href="@{/api/auth/register}">Regístrate desde la API</a></p>
+    </section>
+</main>
+</body>
+</html>
