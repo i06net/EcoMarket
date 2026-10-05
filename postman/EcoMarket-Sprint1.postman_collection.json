@@ -1,0 +1,82 @@
+{
+  "info": {
+    "name": "EcoMarket - Sprint 1 Web y Catálogo",
+    "description": "Pruebas manuales de la API y vistas Thymeleaf del Sprint 1.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Vistas Thymeleaf",
+      "item": [
+        {
+          "name": "Landing page",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/"
+          }
+        },
+        {
+          "name": "Login web",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Catálogo web filtrado",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/catalogo?texto=quinua&categoria=Alimentos%20a%20granel",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["catalogo"],
+              "query": [
+                {"key": "texto", "value": "quinua"},
+                {"key": "categoria", "value": "Alimentos a granel"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "API pública",
+      "item": [
+        {
+          "name": "Login JWT",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@ecomarket.pe\",\n  \"contrasena\": \"Admin12345\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/categorias"
+          }
+        },
+        {
+          "name": "Buscar productos",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/busqueda/productos?texto=quinua&soloDisponibles=true"
+          }
+        }
+      ]
+    }
+  ]
+}
