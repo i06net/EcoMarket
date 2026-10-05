@@ -321,6 +321,15 @@ public class ProductoService {
                     "Envía la latitud y la longitud juntas, o ninguna de las dos"
             );
         }
+        if (latitud != null
+                && (latitud < -90 || latitud > 90
+                || longitud < -180 || longitud > 180)) {
+
+            throw new ReglaNegocioException(
+                    "La latitud debe estar entre -90 y 90 " +
+                    "y la longitud entre -180 y 180"
+            );
+        }
 
         List<Producto> productos =
                 new ArrayList<>();
