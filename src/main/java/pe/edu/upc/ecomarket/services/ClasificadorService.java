@@ -154,8 +154,7 @@ public class ClasificadorService {
 
         for (String numero : respuesta.split("\\D+")) {
 
-            if (numero.isEmpty()) {
-                continue;
+            if (numero.isEmpty() || numero.length() > 18) {
             }
 
             Long id = Long.valueOf(numero);
