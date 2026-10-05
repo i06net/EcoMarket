@@ -160,6 +160,12 @@ public class SuscripcionService {
             );
         }
 
+        if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
+                throw new ReglaNegocioException(
+                        "La promocion debe tener un titulo"
+                );
+        }
+
         Promocion promocion =
                 new Promocion();
 
